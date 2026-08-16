@@ -1,15 +1,25 @@
 const express = require('express');
 const { nanoid } = require('nanoid');
-const db = require('../db/database');
+const { client: db } = require('../db/database');
 const { encrypt, decrypt } = require('../utils/crypto');
 
 const router = express.Router();
 
+const BRAND_NAME = 'DTZ TRIO';
 const TELEGRAM_TOKEN_REGEX = /^\d{6,}:[A-Za-z0-9_-]{30,}$/;
 const CHAT_ID_REGEX = /^-?\d{5,}$/;
 
 function baseUrl(req) {
   return process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+}
+
+// Escapes text for Telegram's HTML parse_mode so a message can never
+// break out of the <blockquote> or inject markup.
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 /**
@@ -49,7 +59,8 @@ router.post('/create-link', async (req, res) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: chat,
-        text: '✅ Your anonymous messaging link is now connected! You\'ll receive messages here.',
+        parse_mode: 'HTML',
+        text: `✅ Your anonymous messaging link is now connected via <b>${BRAND_NAME}</b>. You'll receive messages here.`,
       }),
     });
     const testData = await testResp.json();
@@ -63,12 +74,13 @@ router.post('/create-link', async (req, res) => {
     // 3. Persist (token encrypted at rest)
     let id = nanoid(10);
     // guard against the astronomically unlikely collision
-    const exists = db.prepare('SELECT 1 FROM links WHERE id = ?').get(id);
-    if (exists) id = nanoid(12);
+    const existing = await db.execute({ sql: 'SELECT 1 FROM links WHERE id = ?', args: [id] });
+    if (existing.rows.length > 0) id = nanoid(12);
 
-    db.prepare(
-      `INSERT INTO links (id, bot_token_encrypted, chat_id, display_name) VALUES (?, ?, ?, ?)`
-    ).run(id, encrypt(token), chat, (displayName || '').trim().slice(0, 60) || null);
+    await db.execute({
+      sql: `INSERT INTO links (id, bot_token_encrypted, chat_id, display_name) VALUES (?, ?, ?, ?)`,
+      args: [id, encrypt(token), chat, (displayName || '').trim().slice(0, 60) || null],
+    });
 
     return res.json({
       id,
@@ -85,8 +97,12 @@ router.post('/create-link', async (req, res) => {
  * GET /api/link-info/:id
  * Lets the public send page confirm a link exists before rendering the form.
  */
-router.get('/link-info/:id', (req, res) => {
-  const row = db.prepare('SELECT id, display_name FROM links WHERE id = ?').get(req.params.id);
+router.get('/link-info/:id', async (req, res) => {
+  const result = await db.execute({
+    sql: 'SELECT id, display_name FROM links WHERE id = ?',
+    args: [req.params.id],
+  });
+  const row = result.rows[0];
   if (!row) return res.status(404).json({ error: 'This link does not exist or has been removed.' });
   return res.json({ id: row.id, displayName: row.display_name });
 });
@@ -106,29 +122,51 @@ router.post('/send-message', async (req, res) => {
     }
     const trimmed = message.trim().slice(0, 2000);
 
-    const row = db.prepare('SELECT * FROM links WHERE id = ?').get(id);
+    const result = await db.execute({ sql: 'SELECT * FROM links WHERE id = ?', args: [id] });
+    const row = result.rows[0];
     if (!row) {
       return res.status(404).json({ error: 'This link is invalid or no longer active.' });
     }
 
     const token = decrypt(row.bot_token_encrypted);
 
-    const tgResp = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const formattedText =
+      `<b>📬 New Anonymous Message</b>\n\n` +
+      `<blockquote>${escapeHtml(trimmed)}</blockquote>\n\n` +
+      `<i>Delivered privately via ${BRAND_NAME}</i>`;
+
+    let tgResp = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: row.chat_id,
-        text: `📬 New Anonymous Message:\n\n${trimmed}`,
+        parse_mode: 'HTML',
+        text: formattedText,
       }),
     });
-    const tgData = await tgResp.json();
+    let tgData = await tgResp.json();
+
+    // Fall back to a plain, unformatted message if HTML parsing ever fails
+    // (e.g. an unusual character sequence Telegram rejects) so delivery
+    // never silently breaks for the sender.
+    if (!tgData.ok) {
+      tgResp = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: row.chat_id,
+          text: `📬 New Anonymous Message:\n\n"${trimmed}"\n\n— via ${BRAND_NAME}`,
+        }),
+      });
+      tgData = await tgResp.json();
+    }
 
     if (!tgData.ok) {
       console.error('Telegram delivery failed:', tgData);
       return res.status(502).json({ error: 'Could not deliver your message right now. Please try again later.' });
     }
 
-    db.prepare('UPDATE links SET message_count = message_count + 1 WHERE id = ?').run(id);
+    await db.execute({ sql: 'UPDATE links SET message_count = message_count + 1 WHERE id = ?', args: [id] });
 
     return res.json({ success: true });
   } catch (err) {
