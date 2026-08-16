@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Send an anonymous message — Whisper</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0B0E14',
+          surface: '#12161E',
+          surface2: '#191F2A',
+          hair: '#242B38',
+          muted: '#8992A3',
+          seal: '#E8A33D',
+          wire: '#4FA3E3',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+</head>
+<body class="bg-ink text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center px-6">
+
+  <div class="pointer-events-none fixed inset-0 overflow-hidden">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-seal/5 blur-[120px]"></div>
+  </div>
+
+  <main class="relative w-full max-w-md py-14">
+
+    <!-- Loading state -->
+    <div id="loading-state" class="text-center text-muted text-sm">Loading…</div>
+
+    <!-- Invalid link state -->
+    <div id="invalid-state" class="hidden text-center">
+      <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-surface2 border border-hair flex items-center justify-center">
+        <svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </div>
+      <h1 class="font-display text-2xl text-white mb-2">This link isn't active</h1>
+      <p class="text-muted text-sm">It may have been mistyped, or the owner has removed it.</p>
+    </div>
+
+    <!-- Message form state -->
+    <div id="form-state" class="hidden">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center gap-2 text-xs text-muted uppercase tracking-[0.2em] mb-4">
+          <span class="seal-dot"></span>
+          Fully anonymous
+        </div>
+        <h1 id="recipient-name" class="font-display text-3xl sm:text-4xl text-white leading-tight">
+          Send me an anonymous message
+        </h1>
+        <p class="text-muted text-sm mt-3">No account, no name, no trace. Just write.</p>
+      </div>
+
+      <form id="message-form" class="rounded-2xl border border-hair bg-surface p-5 sm:p-6">
+        <textarea
+          id="message" name="message" rows="5" maxlength="2000"
+          placeholder="Type your anonymous message…"
+          class="w-full bg-surface2 border border-hair focus:border-seal focus:ring-1 focus:ring-seal rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 outline-none resize-none transition-colors"
+        ></textarea>
+        <div class="flex items-center justify-between mt-2 mb-4">
+          <span id="char-count" class="text-xs text-slate-600">0 / 2000</span>
+        </div>
+        <button type="submit" id="send-btn"
+          class="w-full flex items-center justify-center gap-2 bg-seal hover:bg-amber-400 text-ink font-semibold rounded-lg px-4 py-3.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <span id="send-label">Send anonymously</span>
+          <svg id="send-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </button>
+        <p id="send-error" class="hidden text-sm text-red-400 mt-3 leading-relaxed"></p>
+      </form>
+
+      <p class="text-center text-xs text-slate-600 mt-6">
+        We don't log IP addresses, device info, or anything that could identify you.
+      </p>
+    </div>
+
+    <!-- Success state -->
+    <div id="success-state" class="hidden text-center">
+      <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-seal/10 border border-seal/30 flex items-center justify-center seal-pop">
+        <svg class="w-6 h-6 text-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <h1 class="font-display text-3xl text-white mb-2">Message sent</h1>
+      <p class="text-muted text-sm mb-8">It's sealed and on its way. They'll never know it was you.</p>
+      <button id="send-another-btn" class="text-sm text-wire hover:underline">Send another message</button>
+    </div>
+
+  </main>
+
+<script>window.__LINK_ID__ = window.location.pathname.split('/').pop();</script>
+<script src="/js/send.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Whisper — Anonymous messages, delivered to your Telegram</title>
+<meta name="description" content="Generate a personal anonymous messaging link that delivers straight to your Telegram." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: '#0B0E14',
+          surface: '#12161E',
+          surface2: '#191F2A',
+          hair: '#242B38',
+          muted: '#8992A3',
+          seal: '#E8A33D',
+          wire: '#4FA3E3',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+</head>
+<body class="bg-ink text-slate-100 font-sans antialiased min-h-screen">
+
+  <!-- Ambient backdrop -->
+  <div class="pointer-events-none fixed inset-0 overflow-hidden">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-seal/5 blur-[120px]"></div>
+    <div class="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full bg-wire/5 blur-[120px]"></div>
+  </div>
+
+  <main class="relative max-w-2xl mx-auto px-6 py-14 sm:py-20">
+
+    <!-- Hero -->
+    <header class="mb-12 sm:mb-16">
+      <div class="flex items-center gap-2 text-sm text-muted mb-6">
+        <span class="seal-dot"></span>
+        <span class="uppercase tracking-[0.2em] text-xs">Anonymous, by design</span>
+      </div>
+      <h1 class="font-display text-4xl sm:text-5xl leading-[1.1] text-white mb-4">
+        Say what you can't<br /> say out loud.
+      </h1>
+      <p class="text-muted text-base sm:text-lg max-w-md leading-relaxed">
+        Create a private link. Share it anywhere. Every message that lands
+        gets sealed and delivered straight to your Telegram — the sender's
+        identity never leaves their device.
+      </p>
+    </header>
+
+    <!-- Setup instructions (collapsible) -->
+    <details class="group mb-8 rounded-xl border border-hair bg-surface/60 open:bg-surface">
+      <summary class="cursor-pointer list-none flex items-center justify-between px-5 py-4 text-sm font-medium text-slate-200">
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+          First time here? Set up your Telegram bot (2 minutes)
+        </span>
+        <svg class="w-4 h-4 text-muted transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </summary>
+      <ol class="px-5 pb-5 pt-1 space-y-3 text-sm text-muted leading-relaxed">
+        <li><span class="text-slate-300 font-medium">1.</span> Open Telegram and message <a class="text-wire hover:underline" href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a>. Send <code class="text-xs bg-surface2 px-1.5 py-0.5 rounded font-mono">/newbot</code> and follow the prompts.</li>
+        <li><span class="text-slate-300 font-medium">2.</span> BotFather replies with your <span class="text-slate-300">bot token</span> — copy it.</li>
+        <li><span class="text-slate-300 font-medium">3.</span> Message <a class="text-wire hover:underline" href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a> to get your own <span class="text-slate-300">Chat ID</span> (a number).</li>
+        <li><span class="text-slate-300 font-medium">4.</span> Open your new bot in Telegram and press <span class="text-slate-300">Start</span> — this lets it message you.</li>
+        <li><span class="text-slate-300 font-medium">5.</span> Paste both values below.</li>
+      </ol>
+    </details>
+
+    <!-- Form card -->
+    <section id="form-card" class="rounded-2xl border border-hair bg-surface p-6 sm:p-8">
+      <form id="link-form" class="space-y-5" novalidate>
+        <div>
+          <label for="botToken" class="block text-xs uppercase tracking-wider text-muted mb-2">Bot token</label>
+          <input
+            id="botToken" name="botToken" type="text" autocomplete="off" spellcheck="false"
+            placeholder="123456789:AAExampleTokenFromBotFather"
+            class="w-full bg-surface2 border border-hair focus:border-seal focus:ring-1 focus:ring-seal rounded-lg px-4 py-3 text-sm font-mono placeholder:text-slate-600 outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label for="chatId" class="block text-xs uppercase tracking-wider text-muted mb-2">Your chat ID</label>
+          <input
+            id="chatId" name="chatId" type="text" autocomplete="off" spellcheck="false"
+            placeholder="e.g. 5834920172"
+            class="w-full bg-surface2 border border-hair focus:border-seal focus:ring-1 focus:ring-seal rounded-lg px-4 py-3 text-sm font-mono placeholder:text-slate-600 outline-none transition-colors"
+          />
+        </div>
+        <div>
+          <label for="displayName" class="block text-xs uppercase tracking-wider text-muted mb-2">Display name <span class="text-slate-600 normal-case">(optional)</span></label>
+          <input
+            id="displayName" name="displayName" type="text" maxlength="60"
+            placeholder="What senders see, e.g. Ask Priya anything"
+            class="w-full bg-surface2 border border-hair focus:border-seal focus:ring-1 focus:ring-seal rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 outline-none transition-colors"
+          />
+        </div>
+
+        <button type="submit" id="submit-btn"
+          class="w-full flex items-center justify-center gap-2 bg-seal hover:bg-amber-400 text-ink font-semibold rounded-lg px-4 py-3.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <span id="submit-label">Generate my link</span>
+          <svg id="submit-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </button>
+
+        <p id="form-error" class="hidden text-sm text-red-400 leading-relaxed"></p>
+      </form>
+    </section>
+
+    <!-- Result card -->
+    <section id="result-card" class="hidden mt-6 rounded-2xl border border-seal/30 bg-gradient-to-b from-seal/[0.07] to-transparent p-6 sm:p-8">
+      <div class="flex items-center gap-2 mb-4">
+        <svg class="w-5 h-5 text-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+        <p class="text-sm font-medium text-slate-200">Sealed. Your link is live.</p>
+      </div>
+      <div class="flex items-stretch gap-2">
+        <input id="result-link" readonly
+          class="flex-1 min-w-0 bg-surface2 border border-hair rounded-lg px-4 py-3 text-sm font-mono text-slate-300 truncate outline-none" />
+        <button id="copy-btn" class="shrink-0 bg-surface2 hover:bg-hair border border-hair rounded-lg px-4 text-sm font-medium transition-colors">
+          Copy
+        </button>
+      </div>
+      <p class="text-xs text-muted mt-3">Share this anywhere — Instagram bio, Twitter/X, group chats. Every reply goes only to you.</p>
+    </section>
+
+    <footer class="mt-16 text-center text-xs text-slate-600">
+      Your bot token is encrypted at rest and never shown again after setup.
+    </footer>
+  </main>
+
+<script src="/js/landing.js"></script>
+</body>
+</html>

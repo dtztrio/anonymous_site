@@ -1,0 +1,41 @@
+/* Signature element: a small pulsing "wax seal" dot used as a status marker
+   throughout the app — echoes the sealed-letter metaphor of the product. */
+.seal-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #E8A33D;
+  box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.5);
+  animation: seal-pulse 2.4s ease-out infinite;
+}
+
+@keyframes seal-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0.45); }
+  70%  { box-shadow: 0 0 0 8px rgba(232, 163, 61, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 163, 61, 0); }
+}
+
+.seal-pop {
+  animation: seal-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes seal-pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-dot, .seal-pop {
+    animation: none;
+  }
+}
+
+textarea::-webkit-scrollbar {
+  width: 6px;
+}
+textarea::-webkit-scrollbar-thumb {
+  background: #242B38;
+  border-radius: 9999px;
+}
