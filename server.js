@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
 const apiRoutes = require('./routes/api');
+const { initDb } = require('./db/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,13 @@ app.get('/send/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'send.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Anon Messenger running at http://localhost:${PORT}`);
-});
+initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Anon Messenger running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ Failed to connect to the database:', err.message);
+    process.exit(1);
+  });
