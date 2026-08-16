@@ -13,90 +13,150 @@
     theme: {
       extend: {
         colors: {
-          ink: '#0B0E14',
-          surface: '#12161E',
-          surface2: '#191F2A',
-          hair: '#242B38',
-          muted: '#8992A3',
-          seal: '#E8A33D',
-          wire: '#4FA3E3',
+          ink: '#090C10',
+          surface: '#11151D',
+          surface2: '#181E29',
+          hair: '#212938',
+          muted: '#8B94A5',
+          seal: '#F0B441',
+          sealHover: '#F5C25F',
+          wire: '#53B1FF',
         },
         fontFamily: {
           display: ['Fraunces', 'serif'],
           sans: ['Inter', 'sans-serif'],
           mono: ['"IBM Plex Mono"', 'monospace'],
         },
+        boxShadow: {
+          'neon': '0 0 60px -15px rgba(240, 180, 65, 0.15)',
+          'card': '0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+        }
       },
     },
   };
 </script>
+<style>
+  .bg-mesh {
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(240, 180, 65, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(83, 177, 255, 0.05) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(18, 22, 30, 1) 0px, transparent 100%);
+  }
+  .seal-pulse {
+    animation: pulseGlow 3s infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 15px rgba(240, 180, 65, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(240, 180, 65, 0.4); }
+  }
+</style>
 </head>
-<body class="bg-ink text-slate-100 font-sans antialiased min-h-screen flex items-center justify-center px-6">
+<body class="bg-ink text-slate-100 font-sans antialiased min-h-screen flex flex-col items-center justify-between px-6 py-8 relative overflow-x-hidden bg-mesh">
 
+  <!-- Ambient Backdrop Glows -->
   <div class="pointer-events-none fixed inset-0 overflow-hidden">
-    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-seal/5 blur-[120px]"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-seal/5 blur-[160px]"></div>
   </div>
 
-  <main class="relative w-full max-w-md py-14">
+  <!-- DTZ Trio Branded Header Navbar -->
+  <header class="w-full max-w-md z-20">
+    <div class="w-full bg-surface/80 backdrop-blur-xl border border-hair/80 rounded-2xl p-3 px-4 flex items-center justify-between shadow-card">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-surface2 border border-hair flex items-center justify-center text-seal shadow-inner">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <span class="font-mono font-semibold tracking-wider text-sm text-white flex items-center gap-1.5">
+          DTZ <span class="text-seal">TRIO</span>
+        </span>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface2/60 border border-hair/60 text-[11px] font-mono text-muted">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        Secure
+      </div>
+    </div>
+  </header>
+
+  <main class="relative w-full max-w-md py-6 z-10">
 
     <!-- Loading state -->
-    <div id="loading-state" class="text-center text-muted text-sm">Loading…</div>
+    <div id="loading-state" class="text-center text-muted text-sm flex flex-col items-center justify-center gap-4 py-12">
+      <div class="relative flex items-center justify-center">
+        <div class="w-10 h-10 rounded-full border border-hair"></div>
+        <div class="absolute w-10 h-10 rounded-full border-2 border-seal border-t-transparent animate-spin"></div>
+      </div>
+      <span class="tracking-wide text-xs uppercase font-mono text-slate-400">Establishing secure channel…</span>
+    </div>
 
     <!-- Invalid link state -->
-    <div id="invalid-state" class="hidden text-center">
-      <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-surface2 border border-hair flex items-center justify-center">
-        <svg class="w-5 h-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    <div id="invalid-state" class="hidden text-center backdrop-blur-2xl bg-surface/80 border border-hair/90 rounded-3xl p-8 sm:p-10 shadow-card">
+      <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-surface2 border border-hair flex items-center justify-center shadow-inner text-rose-400">
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </div>
-      <h1 class="font-display text-2xl text-white mb-2">This link isn't active</h1>
-      <p class="text-muted text-sm">It may have been mistyped, or the owner has removed it.</p>
+      <h1 class="font-display text-2xl sm:text-3xl text-white mb-3">Link unavailable</h1>
+      <p class="text-muted text-sm leading-relaxed">This secure link is either incorrect, expired, or has been deactivated by the owner.</p>
     </div>
 
     <!-- Message form state -->
     <div id="form-state" class="hidden">
       <div class="text-center mb-8">
-        <div class="flex items-center justify-center gap-2 text-xs text-muted uppercase tracking-[0.2em] mb-4">
-          <span class="seal-dot"></span>
-          Fully anonymous
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface2/80 border border-hair/80 text-[11px] font-mono text-seal tracking-wider uppercase mb-5 shadow-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-seal seal-pulse"></span>
+          End-to-End Encrypted
         </div>
-        <h1 id="recipient-name" class="font-display text-3xl sm:text-4xl text-white leading-tight">
+        <h1 id="recipient-name" class="font-display text-3xl sm:text-4xl text-white tracking-tight leading-[1.15]">
           Send me an anonymous message
         </h1>
-        <p class="text-muted text-sm mt-3">No account, no name, no trace. Just write.</p>
+        <p class="text-muted text-sm mt-3 font-normal">Zero logs. No account. Total confidentiality.</p>
       </div>
 
-      <form id="message-form" class="rounded-2xl border border-hair bg-surface p-5 sm:p-6">
-        <textarea
-          id="message" name="message" rows="5" maxlength="2000"
-          placeholder="Type your anonymous message…"
-          class="w-full bg-surface2 border border-hair focus:border-seal focus:ring-1 focus:ring-seal rounded-lg px-4 py-3 text-sm placeholder:text-slate-600 outline-none resize-none transition-colors"
-        ></textarea>
-        <div class="flex items-center justify-between mt-2 mb-4">
-          <span id="char-count" class="text-xs text-slate-600">0 / 2000</span>
+      <form id="message-form" class="rounded-3xl border border-hair/90 bg-surface/90 backdrop-blur-2xl p-6 sm:p-7 shadow-card shadow-neon">
+        <div class="relative group">
+          <textarea
+            id="message" name="message" rows="5" maxlength="2000"
+            placeholder="Write your anonymous note here…"
+            class="w-full bg-surface2/90 border border-hair focus:border-seal focus:ring-2 focus:ring-seal/20 rounded-2xl p-4 text-sm placeholder:text-slate-600 text-slate-100 outline-none resize-none transition-all duration-200"
+          ></textarea>
         </div>
+        
+        <div class="flex items-center justify-between mt-3 mb-6 px-1">
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
+            <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Secure Payload
+          </span>
+          <span id="char-count" class="text-[11px] font-mono text-slate-500">0 / 2000</span>
+        </div>
+
         <button type="submit" id="send-btn"
-          class="w-full flex items-center justify-center gap-2 bg-seal hover:bg-amber-400 text-ink font-semibold rounded-lg px-4 py-3.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          <span id="send-label">Send anonymously</span>
-          <svg id="send-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+          class="w-full relative group overflow-hidden flex items-center justify-center gap-2 bg-seal hover:bg-sealHover text-ink font-semibold rounded-2xl py-4 px-5 transition-all duration-200 shadow-xl shadow-seal/15 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span id="send-label" class="tracking-wide text-sm font-semibold">Send anonymously</span>
+          <svg id="send-spinner" class="hidden w-4 h-4 animate-spin text-ink" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
         </button>
-        <p id="send-error" class="hidden text-sm text-red-400 mt-3 leading-relaxed"></p>
+        
+        <p id="send-error" class="hidden text-sm text-rose-400 mt-4 text-center leading-relaxed bg-rose-950/40 border border-rose-900/50 rounded-2xl p-3.5"></p>
       </form>
 
-      <p class="text-center text-xs text-slate-600 mt-6">
-        We don't log IP addresses, device info, or anything that could identify you.
-      </p>
+      <div class="flex items-center justify-center gap-2 text-center text-xs text-slate-500 mt-8">
+        <svg class="w-3.5 h-3.5 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>IP addresses and metadata are never logged or stored.</span>
+      </div>
     </div>
 
     <!-- Success state -->
-    <div id="success-state" class="hidden text-center">
-      <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-seal/10 border border-seal/30 flex items-center justify-center seal-pop">
-        <svg class="w-6 h-6 text-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+    <div id="success-state" class="hidden text-center backdrop-blur-2xl bg-surface/80 border border-hair/90 rounded-3xl p-8 sm:p-10 shadow-card">
+      <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-seal/10 border border-seal/30 flex items-center justify-center shadow-lg shadow-seal/10 seal-pulse">
+        <svg class="w-7 h-7 text-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
       </div>
-      <h1 class="font-display text-3xl text-white mb-2">Message sent</h1>
-      <p class="text-muted text-sm mb-8">It's sealed and on its way. They'll never know it was you.</p>
-      <button id="send-another-btn" class="text-sm text-wire hover:underline">Send another message</button>
+      <h1 class="font-display text-3xl text-white mb-2.5">Message delivered</h1>
+      <p class="text-muted text-sm mb-8 leading-relaxed max-w-xs mx-auto">Your note has been securely dispatched. Complete anonymity is guaranteed.</p>
+      <button id="send-another-btn" class="inline-flex items-center justify-center text-sm font-medium text-wire hover:text-sky-300 transition-colors py-2.5 px-5 rounded-xl bg-wire/10 border border-wire/20">Send another message</button>
     </div>
 
   </main>
+
+  <!-- Footer Branding -->
+  <footer class="w-full max-w-md text-center z-10 text-xs text-slate-600 font-mono">
+    Powered by <span class="text-slate-400">DTZ Trio</span>
+  </footer>
 
 <script>window.__LINK_ID__ = window.location.pathname.split('/').pop();</script>
 <script src="/js/send.js"></script>
